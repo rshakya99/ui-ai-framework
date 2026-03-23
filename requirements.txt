@@ -4,3 +4,5 @@ langgraph
 langchain-openai
 python-dotenv
 webdriver-manager
+pytest-json-report
+pandas
