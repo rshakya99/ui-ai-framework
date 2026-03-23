@@ -1,43 +1,24 @@
-name: Run Pytest + Send to n8n
+- name: Install Dependencies
+  run: |
+    pip install -r requirements.txt
+    pip install pytest pytest-json-report pandas allure-pytest
 
-on:
-  schedule:
-    - cron: '30 16 * * *'   # Nightly
-    - cron: '0 */5 * * *'   # Every 5 hours
-  workflow_dispatch:
+- name: Run Login Test with Allure + JSON
+  run: |
+    pytest tests/test_login.py \
+    --alluredir=allure-results \
+    --json-report --json-report-file=report.json \
+    --disable-warnings -v || true
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+- name: Upload Allure Results
+  uses: actions/upload-artifact@v4
+  with:
+    name: allure-results
+    path: allure-results
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-json-report pandas
-
-      - name: Run Tests
-        run: |
-          pytest --json-report --json-report-file=report.json || true
-
-      - name: Send Results to n8n
-        if: always()
-        run: |
-          if [ -f report.json ]; then
-            curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
-            -H "Content-Type: application/json" \
-            -d @report.json
-          else
-            echo '{"summary":{"total":0,"passed":0,"failed":1}}' > report.json
-            curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
-            -H "Content-Type: application/json" \
-            -d @report.json
-          fi
+- name: Send Results to n8n
+  if: always()
+  run: |
+    curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
+    -H "Content-Type: application/json" \
+    -d @report.json

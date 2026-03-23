@@ -27,35 +27,30 @@ def planner_agent(state):
     - No JavaScript (.repeat etc.)
     """
 
-    response = llm.invoke(prompt)
-
     try:
+        response = llm.invoke(prompt)
         clean_json = extract_json(response.content)
         test_cases = json.loads(clean_json)
     except Exception as e:
-        print("JSON PARSE ERROR:", e)
-        test_cases = []
-
-    # ✅ FALLBACK
-    if not test_cases:
-        print("⚠️ Using fallback test cases")
-
+        print("LLM failed:", e)
+        print("\u26a0\ufe0f Using fallback test cases")
         test_cases = [
-            {
-                "name": "valid login",
-                "username": "tomsmith",
-                "password": "SuperSecretPassword!",
-                "expected": "success"
-            },
-            {
-                "name": "invalid login",
-                "username": "tomsmith",
-                "password": "wrong",
-                "expected": "failure"
-            }
+            {"name": "valid login", "username": "tomsmith", "password": "SuperSecretPassword!", "expected": "success"},
+            {"name": "invalid password", "username": "tomsmith", "password": "wrong", "expected": "failure"},
+            {"name": "invalid username", "username": "wronguser", "password": "SuperSecretPassword!", "expected": "failure"},
+            {"name": "both invalid", "username": "wronguser", "password": "wrong", "expected": "failure"},
+            {"name": "empty username", "username": "", "password": "SuperSecretPassword!", "expected": "failure"},
+            {"name": "empty password", "username": "tomsmith", "password": "", "expected": "failure"},
+            {"name": "both empty", "username": "", "password": "", "expected": "failure"},
+            {"name": "username special chars", "username": "tom$mith", "password": "SuperSecretPassword!", "expected": "failure"},
+            {"name": "password special chars", "username": "tomsmith", "password": "Super$ecret!", "expected": "failure"},
+            {"name": "username leading/trailing spaces", "username": " tomsmith ", "password": "SuperSecretPassword!", "expected": "failure"},
+            {"name": "password leading/trailing spaces", "username": "tomsmith", "password": " SuperSecretPassword! ", "expected": "failure"},
+            {"name": "sql injection username", "username": "' OR '1'='1", "password": "SuperSecretPassword!", "expected": "failure"},
+            {"name": "sql injection password", "username": "tomsmith", "password": "' OR '1'='1", "expected": "failure"}
         ]
 
-    # 🔥 🔥 ADD THIS VALIDATION (VERY IMPORTANT)
+    # \ud83d\udd25 \ud83d\udd25 ADD THIS VALIDATION (VERY IMPORTANT)
     for tc in test_cases:
         username = tc.get("username", "")
         password = tc.get("password", "")

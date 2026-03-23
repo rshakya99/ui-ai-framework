@@ -12,7 +12,6 @@ def get_test_cases():
     except Exception as e:
         print("LLM failed:", e)
 
-    # fallback
-    print("Using JSON fallback")
-    with open("test_data/login.json") as f:
-        return json.load(f)
+    # fallback to hardcoded test cases from planner_agent
+    print("Using hardcoded fallback test cases")
+    return planner_agent({"scenario": "Login functionality"})["test_cases"]
