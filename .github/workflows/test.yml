@@ -1,24 +1,60 @@
-- name: Install Dependencies
-  run: |
-    pip install -r requirements.txt
-    pip install pytest pytest-json-report pandas allure-pytest
+name: Run Login Test + Allure + n8n
 
-- name: Run Login Test with Allure + JSON
-  run: |
-    pytest tests/test_login.py \
-    --alluredir=allure-results \
-    --json-report --json-report-file=report.json \
-    --disable-warnings -v || true
+on:
+schedule:
+- cron: '30 16 * * *'   # Nightly (10 PM IST)
+- cron: '0 */5 * * *'   # Every 5 hours
+workflow_dispatch:
 
-- name: Upload Allure Results
-  uses: actions/upload-artifact@v4
-  with:
-    name: allure-results
-    path: allure-results
+jobs:
+test:
+runs-on: ubuntu-latest
 
-- name: Send Results to n8n
-  if: always()
-  run: |
-    curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
-    -H "Content-Type: application/json" \
-    -d @report.json
+```
+steps:
+  # 1️⃣ Checkout Code
+  - name: Checkout Code
+    uses: actions/checkout@v4
+
+  # 2️⃣ Setup Python
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.11'
+
+  # 3️⃣ Install Dependencies
+  - name: Install Dependencies
+    run: |
+      pip install -r requirements.txt
+      pip install pytest pytest-json-report pandas allure-pytest
+
+  # 4️⃣ Run Specific Test (Login) + Allure + JSON
+  - name: Run Login Test with Allure + JSON
+    run: |
+      pytest tests/test_login.py \
+      --alluredir=allure-results \
+      --json-report --json-report-file=report.json \
+      --disable-warnings -v || true
+
+  # 5️⃣ Upload Allure Results (Artifact)
+  - name: Upload Allure Results
+    uses: actions/upload-artifact@v4
+    with:
+      name: allure-results
+      path: allure-results
+
+  # 6️⃣ Send Results to n8n Webhook
+  - name: Send Results to n8n
+    if: always()
+    run: |
+      if [ -f report.json ]; then
+        curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
+        -H "Content-Type: application/json" \
+        -d @report.json
+      else
+        echo '{"summary":{"total":0,"passed":0,"failed":1}}' > report.json
+        curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
+        -H "Content-Type: application/json" \
+        -d @report.json
+      fi
+```
