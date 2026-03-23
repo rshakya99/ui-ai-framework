@@ -1,0 +1,6 @@
+selenium
+pytest
+langgraph
+langchain-openai
+python-dotenv
+webdriver-manager

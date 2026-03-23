@@ -1,0 +1,51 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ignoredPackages">
+        <list>
+          <option value="allure-pytest" />
+          <option value="py" />
+          <option value="requests" />
+          <option value="urllib3" />
+          <option value="certifi" />
+          <option value="charset-normalizer" />
+          <option value="idna" />
+          <option value="beautifulsoup4" />
+          <option value="soupsieve" />
+          <option value="paramiko" />
+          <option value="bcrypt" />
+          <option value="cryptography" />
+          <option value="PyNaCl" />
+          <option value="cffi" />
+          <option value="pycparser" />
+          <option value="scapy" />
+          <option value="polling" />
+          <option value="black" />
+          <option value="click" />
+          <option value="pathspec" />
+          <option value="platformdirs" />
+          <option value="tomli" />
+          <option value="tomlkit" />
+          <option value="pylint" />
+          <option value="astroid" />
+          <option value="isort" />
+          <option value="lazy-object-proxy" />
+          <option value="mccabe" />
+          <option value="wrapt" />
+          <option value="dill" />
+          <option value="jsonschema" />
+          <option value="pyrsistent" />
+          <option value="pyparsing" />
+          <option value="rfc3339-validator" />
+          <option value="six" />
+          <option value="typing-extensions" />
+          <option value="zipp" />
+          <option value="importlib-resources" />
+          <option value="pexpect" />
+          <option value="ptyprocess" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
