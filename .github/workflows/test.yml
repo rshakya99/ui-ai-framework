@@ -1,53 +1,27 @@
 name: Run Login Test + Allure + n8n
 
 on:
-workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
-test:
-runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-```
-env:
-  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-steps:
-  - name: Checkout Code
-    uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-  - name: Setup Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: '3.11'
+      - name: Install Dependencies
+        run: pip install pytest pytest-json-report pandas allure-pytest
 
-  - name: Install Dependencies
-    run: |
-      pip install -r requirements.txt
-      pip install pytest pytest-json-report pandas allure-pytest
+      - name: Run Login Test
+        run: pytest tests/test_login.py --disable-warnings -v --json-report --json-report-file=report.json --alluredir=allure-results || true
 
-  - name: Run Login Test
-    run: |
-      pytest tests/test_login.py --disable-warnings -v \
-      --json-report --json-report-file=report.json \
-      --alluredir=allure-results || true
-
-  - name: Upload Allure Results
-    uses: actions/upload-artifact@v4
-    with:
-      name: allure-results
-      path: allure-results
-
-  - name: Send Results to n8n
-    if: always()
-    run: |
-      if [ -f report.json ]; then
-        curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
-        -H "Content-Type: application/json" \
-        -d @report.json
-      else
-        echo '{"summary":{"total":0,"passed":0,"failed":1}}' > report.json
-        curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
-        -H "Content-Type: application/json" \
-        -d @report.json
-      fi
-```
+      - name: Send Results to n8n
+        if: always()
+        run: curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results -H "Content-Type: application/json" -d @report.json
