@@ -1,4 +1,4 @@
-name: Run Login Test + Allure + n8n
+name: Test Workflow
 
 on:
   workflow_dispatch:
@@ -8,20 +8,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Hello
+        run: echo Hello
+      - name: Checkout
         uses: actions/checkout@v4
-
+      - name: Hello
+        run: echo Hello
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Install Dependencies
-        run: pip install pytest pytest-json-report pandas allure-pytest
-
+          python-version: 3.11
+      - name: Install
+        run: pip install pytest
+      - name: Run Test
+        run: pytest
       - name: Run Login Test
-        run: pytest tests/test_login.py --disable-warnings -v --json-report --json-report-file=report.json --alluredir=allure-results || true
-
-      - name: Send Results to n8n
-        if: always()
+        run: pytest tests/test_login.py --disable-warnings -v --json-report --json-report-file=report.json --alluredir=allure-results
+      - name: Send Results
         run: curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results -H "Content-Type: application/json" -d @report.json
