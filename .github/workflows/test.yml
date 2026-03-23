@@ -1,0 +1,35 @@
+name: Run Pytest + Send to n8n
+
+on:
+  schedule:
+    - cron: '30 16 * * *'
+    - cron: '0 */5 * * *'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-json-report
+
+      - name: Run Tests
+        run: |
+          pytest --json-report --json-report-file=report.json
+        continue-on-error: true
+
+      - name: Send Results to n8n
+        if: always()
+        run: |
+          curl -X POST https://rohits45.app.n8n.cloud/webhook/test-results \
+          -H "Content-Type: application/json" \
+          -d @report.json
